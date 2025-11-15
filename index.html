@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading UI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              mint: '#DDF4E7',
+              leaf: '#67C090',
+              teal: '#26667F',
+              navy: '#124170'
+            },
+            boxShadow: {
+              card: '0 10px 25px -5px rgba(18, 65, 112, 0.15), 0 8px 10px -6px rgba(18, 65, 112, 0.10)'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Smooth fonts */
+      body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-mint text-navy">
+    <!-- Side Navigation -->
+    <aside class="fixed inset-y-0 left-0 w-56 bg-white border-r border-teal/10 shadow-card z-40">
+      <div class="h-full flex flex-col">
+        <div class="px-4 py-4 border-b border-teal/10">
+          <div class="text-base font-semibold text-navy">App Navigation</div>
+        </div>
+        <nav class="flex-1 px-2 py-3 space-y-1">
+          <button type="button" data-nav="home" class="nav-link w-full text-left rounded-md px-3 py-2 bg-mint text-navy font-semibold shadow-sm">Home</button>
+          <button type="button" data-nav="analysis" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition">Analysis</button>
+          <button type="button" data-nav="finances" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition">Finances</button>
+        </nav>
+        <div class="px-4 py-3 text-xs text-navy/60 border-t border-teal/10">© 2025</div>
+      </div>
+    </aside>
+    <div class="pl-56">
+    <!-- Sticky Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-teal/10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <!-- Left: Credentials + Connect -->
+          <div id="connectionControls" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:max-w-3xl">
+            <label class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-medium text-navy/80">API Key</span>
+              <input id="apiKey" type="password" placeholder="Enter API Key" class="w-full rounded-lg border border-teal/20 bg-mint/50 px-3 py-1.5 text-navy placeholder-navy/40 focus:outline-none focus:ring-2 focus:ring-leaf/60 focus:border-leaf/60" />
+            </label>
+            <label class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-medium text-navy/80">App ID</span>
+              <input id="appId" type="text" placeholder="Enter App ID" class="w-full rounded-lg border border-teal/20 bg-mint/50 px-3 py-1.5 text-navy placeholder-navy/40 focus:outline-none focus:ring-2 focus:ring-leaf/60 focus:border-leaf/60" />
+            </label>
+            <div class="flex items-end">
+              <button id="connectBtn" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-leaf text-white font-medium text-sm px-3 py-1.5 shadow hover:brightness-95 active:brightness-90 transition">
+                <span class="h-2.5 w-2.5 rounded-full bg-white/80 shadow-sm"></span>
+                <span>Connect</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Balances -->
+          <div class="grid grid-cols-2 gap-3 w-full md:w-auto md:min-w-[320px]">
+            <label class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-medium text-navy/80">Actual Balance</span>
+              <input id="actualBalance" type="text" placeholder="0.00" readonly class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-1.5 text-navy placeholder-navy/40 focus:outline-none" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- Live Data Card -->
+      <section class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-navy">Live Data</h2>
+          <span class="text-xs px-2 py-1 rounded-full bg-teal/10 text-teal font-medium">streaming</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="flex flex-col">
+            <span class="text-sm font-medium text-navy/80 mb-1">Market</span>
+            <select id="market" class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-2 text-navy focus:outline-none focus:ring-2 focus:ring-leaf/60">
+              <option>Synthetic Index</option>
+            </select>
+          </label>
+          <label class="flex flex-col">
+            <span class="text-sm font-medium text-navy/80 mb-1">Price</span>
+            <input id="price" type="text" placeholder="—" readonly class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-2 text-navy placeholder-navy/40" />
+          </label>
+          <label class="flex flex-col">
+            <span class="text-sm font-medium text-navy/80 mb-1">Last Digit</span>
+            <input id="lastDigit" type="text" placeholder="—" readonly class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-2 text-navy placeholder-navy/40" />
+          </label>
+        </div>
+      </section>
+
+      <!-- Home Section -->
+      <div id="homeSection" data-section="home" class="space-y-6">
+        <!-- Trading Cards Row -->
+        <section class="grid grid-cols-1 gap-6">
+          <!-- Actual Trading -->
+          <div class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6 w-full mx-auto">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Actual Trading</h3>
+              <span class="text-xs px-2 py-1 rounded-full bg-navy/10 text-navy font-medium">live</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <label class="flex flex-col">
+                <span class="text-sm font-medium text-navy/80 mb-1">Stake</span>
+                <input id="actualTradeStake" type="number" placeholder="e.g. 10.00" class="w-full rounded-lg border border-teal/20 bg-white px-3 py-2 text-navy placeholder-navy/40" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm font-medium text-navy/80 mb-1">Target Profit</span>
+                <input id="actualTargetProfit" type="number" placeholder="e.g. 5.00" class="w-full rounded-lg border border-teal/20 bg-white px-3 py-2 text-navy placeholder-navy/40" />
+              </label>
+              <label class="flex flex-col">
+                <span class="text-sm font-medium text-navy/80 mb-1">Stop Loss</span>
+                <input id="actualStopLoss" type="number" placeholder="e.g. 2.50" class="w-full rounded-lg border border-teal/20 bg-white px-3 py-2 text-navy placeholder-navy/40" />
+              </label>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <button id="btnMatchesV1" class="w-full rounded-lg bg-teal text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Matches v1</button>
+              <button id="btnActualOver5Under4" class="trade-btn w-full rounded-lg bg-teal text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Over 5 / Under 4</button>
+            </div>
+            <div class="flex items-center gap-3 mb-3 text-xs">
+              <span class="inline-flex items-center gap-1 rounded-full bg-mint/60 text-navy px-2 py-1 border border-teal/20">
+                <span class="h-1.5 w-1.5 rounded-full bg-leaf"></span>
+                <span>Streak < 2:</span>
+                <strong id="streakBelow2" class="font-semibold">0</strong>
+              </span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-mint/60 text-navy px-2 py-1 border border-teal/20">
+                <span class="h-1.5 w-1.5 rounded-full bg-teal"></span>
+                <span>Streak > 7:</span>
+                <strong id="streakAbove7" class="font-semibold">0</strong>
+              </span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-2 gap-3">
+              <button id="btnActualOver1Normal" class="trade-btn w-full rounded-lg bg-leaf text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Over 1 Normal</button>
+              <button id="btnActualUnder8Normal" class="trade-btn w-full rounded-lg bg-leaf text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Under 8 Normal</button>
+              <button id="btnActualOver1Pattern" class="trade-btn w-full rounded-lg bg-teal text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Over 1 Pattern</button>
+              <button id="btnActualUnder8Pattern" class="trade-btn w-full rounded-lg bg-teal text-white font-semibold px-4 py-3 shadow hover:brightness-95 active:brightness-90 transition">Under 8 Pattern</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Logs and Results Row -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Logging Window -->
+          <div class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Logging Window</h3>
+              <button id="clearLogs" class="text-sm text-teal hover:underline">Clear</button>
+            </div>
+            <div id="logContainer" class="flex-1 min-h-[220px] max-h-[300px] overflow-auto rounded-lg border border-teal/20 bg-mint/40 p-3 text-sm leading-6 text-navy/90">
+              <!-- Logs will appear here -->
+            </div>
+          </div>
+
+          <!-- Trade Results -->
+          <div class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Trade Results</h3>
+              <div class="text-sm text-navy/70">Summary</div>
+            </div>
+            <div class="overflow-x-auto max-h-72 overflow-y-auto">
+              <table class="min-w-full text-left border-separate border-spacing-y-2">
+                <thead>
+                  <tr class="text-xs uppercase tracking-wide text-navy/60">
+                    <th class="px-3 py-2">Trade Type</th>
+                    <th class="px-3 py-2">Entry Price</th>
+                    <th class="px-3 py-2">Exit Price</th>
+                    <th class="px-3 py-2">Profit/Loss</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody">
+                  <!-- Dynamic rows go here -->
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" class="px-3 py-3 text-sm font-semibold text-navy/80">Overall Profit/Loss</td>
+                    <td id="overallPnL" class="px-3 py-3 text-sm font-bold text-leaf">0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Analysis Section -->
+      <div id="analysisSection" data-section="analysis" class="space-y-6 hidden">
+        <section class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-navy">Digits Distribution</h2>
+            <div class="flex items-center gap-3">
+              <label class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-medium text-navy/80">Window</span>
+                <input id="windowSize" type="number" min="10" max="1000" step="10" value="1000" class="w-24 rounded-lg border border-teal/20 bg-mint/40 px-2 py-1 text-sm text-navy placeholder-navy/40 focus:outline-none focus:ring-2 focus:ring-leaf/60" />
+              </label>
+              <div id="selectedMarketName" class="text-sm text-navy/70">—</div>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left border-separate border-spacing-y-2">
+              <thead>
+                <tr class="text-xs uppercase tracking-wide text-navy/60">
+                  <th class="px-3 py-2">Market</th>
+                  <th class="px-3 py-2">0</th>
+                  <th class="px-3 py-2">1</th>
+                  <th class="px-3 py-2">2</th>
+                  <th class="px-3 py-2">3</th>
+                  <th class="px-3 py-2">4</th>
+                  <th class="px-3 py-2">5</th>
+                  <th class="px-3 py-2">6</th>
+                  <th class="px-3 py-2">7</th>
+                  <th class="px-3 py-2">8</th>
+                  <th class="px-3 py-2">9</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-mint/40">
+                  <td id="cellMarket" class="px-3 py-2 rounded-l-md">—</td>
+                  <td id="d0" class="px-3 py-2">0%</td>
+                  <td id="d1" class="px-3 py-2">0%</td>
+                  <td id="d2" class="px-3 py-2">0%</td>
+                  <td id="d3" class="px-3 py-2">0%</td>
+                  <td id="d4" class="px-3 py-2">0%</td>
+                  <td id="d5" class="px-3 py-2">0%</td>
+                  <td id="d6" class="px-3 py-2">0%</td>
+                  <td id="d7" class="px-3 py-2">0%</td>
+                  <td id="d8" class="px-3 py-2">0%</td>
+                  <td id="d9" class="px-3 py-2 rounded-r-md">0%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-navy">Matches Analysis</h2>
+            <button id="matchesAnalysisToggle" class="text-sm font-medium text-teal hover:underline">Expand</button>
+          </div>
+          <div id="matchesAnalysisContent" class="hidden">
+            <div id="matchesAnalysisSummary" class="text-sm text-navy/80 space-y-4"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Finances Section -->
+      <div id="financesSection" data-section="finances" class="space-y-6 hidden">
+        <section class="bg-white rounded-xl shadow-card border border-teal/10 p-6">
+          <h2 class="text-lg font-semibold mb-2">Accounts &amp; P/L</h2>
+          <p class="text-navy/80">This is a placeholder for balances, statements, and financial summaries.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="ws.js"></script>
+    <script src="trading.js"></script>
+    <script src="pattern_trading.js"></script>
+    <script src="matches_analysis.js"></script>
+    <script src="matches_trading.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const navButtons = document.querySelectorAll('[data-nav]');
+        const sections = document.querySelectorAll('[data-section]');
+        const connectionControls = document.getElementById('connectionControls');
+        const clearLogsBtn = document.getElementById('clearLogs');
+        const logContainer = document.getElementById('logContainer');
+
+        function toggleNavState(activeKey) {
+          navButtons.forEach((btn) => {
+            const isActive = btn.dataset.nav === activeKey;
+            btn.classList.toggle('bg-mint', isActive);
+            btn.classList.toggle('text-navy', isActive);
+            btn.classList.toggle('font-semibold', isActive);
+            btn.classList.toggle('shadow-sm', isActive);
+            btn.classList.toggle('text-navy/80', !isActive);
+          });
+        }
+
+        function showSection(key) {
+          sections.forEach((section) => {
+            section.classList.toggle('hidden', section.dataset.section !== key);
+          });
+          toggleNavState(key);
+          if (connectionControls) {
+            connectionControls.classList.toggle('hidden', key !== 'home');
+          }
+        }
+
+        navButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            showSection(btn.dataset.nav);
+          });
+        });
+
+        if (clearLogsBtn && logContainer) {
+          clearLogsBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '';
+          });
+        }
+        const setupDigitsDistribution = () => {
+          const marketSelect = document.getElementById('market');
+          const nameBadge = document.getElementById('selectedMarketName');
+          const cellMarket = document.getElementById('cellMarket');
+          const cells = Array.from({ length: 10 }, (_, i) => document.getElementById('d' + i));
+          const windowInput = document.getElementById('windowSize');
+          let activeSymbol = marketSelect?.value || null;
+          let windowSize = Math.max(10, Math.min(1000, Number(windowInput?.value || 1000)));
+
+          function updateLabels(label) {
+            const text = label || '—';
+            if (nameBadge) nameBadge.textContent = text;
+            if (cellMarket) cellMarket.textContent = text;
+          }
+
+          function renderFromStats(stats, queue) {
+            const q = Array.isArray(queue) ? queue : [];
+            const n = Math.max(1, Math.min(windowSize, q.length || (stats?.total || 0)));
+            // Build counts from last n of queue when available; fallback to stats if queue empty
+            const counts = Array.from({ length: 10 }, () => 0);
+            if (q.length > 0) {
+              const start = Math.max(0, q.length - n);
+              for (let i = start; i < q.length; i++) {
+                const d = q[i];
+                if (d >= 0 && d <= 9) counts[d] += 1;
+              }
+            } else {
+              const safe = stats || { total: 0, counts: Array.from({ length: 10 }, () => 0) };
+              for (let i = 0; i < 10; i++) counts[i] = safe.counts?.[i] || 0;
+            }
+            const total = counts.reduce((a, b) => a + b, 0);
+            const maxCount = counts.length ? Math.max(...counts) : 0;
+            const minCount = counts.length ? Math.min(...counts) : 0;
+            const canHighlight = total > 0 && maxCount > minCount;
+            for (let i = 0; i < 10; i++) {
+              const cell = cells[i];
+              if (!cell) continue;
+              const count = counts[i];
+              const pct = total > 0 ? (count * 100) / total : 0;
+              cell.textContent = pct.toFixed(1) + '%';
+              // reset previous highlights
+              cell.classList.remove('text-leaf', 'text-red-600', 'font-semibold');
+              if (canHighlight) {
+                if (count === maxCount) {
+                  cell.classList.add('text-leaf', 'font-semibold');
+                } else if (count === minCount) {
+                  cell.classList.add('text-red-600', 'font-semibold');
+                }
+              }
+            }
+          }
+
+          function syncSelection({ forceReset = false } = {}) {
+            const wsApi = window.AppWS;
+            if (!wsApi) return;
+            const opt = marketSelect?.selectedOptions?.[0] || null;
+            const label = opt ? opt.textContent : '—';
+            const symbol = marketSelect ? marketSelect.value : null;
+            if (forceReset && symbol) {
+              wsApi.resetDigitStats(symbol);
+            }
+            if (symbol !== activeSymbol) {
+              activeSymbol = symbol;
+            }
+            updateLabels(label);
+            const stats = wsApi.getDigitStats(symbol);
+            const queue = wsApi.getDigitQueue(symbol);
+            renderFromStats(stats, queue);
+          }
+
+          if (marketSelect) {
+            marketSelect.addEventListener('change', () => {
+              syncSelection({ forceReset: true });
+            });
+          }
+          if (windowInput) {
+            windowInput.addEventListener('change', () => {
+              const next = Number(windowInput.value || 1000);
+              windowSize = Math.max(10, Math.min(1000, next));
+              // re-render with new window
+              syncSelection({ forceReset: false });
+            });
+          }
+
+          const observer = new MutationObserver(() => syncSelection({ forceReset: false }));
+          if (marketSelect) observer.observe(marketSelect, { childList: true });
+
+          document.addEventListener('ws:market-subscribed', (evt) => {
+            const detailSymbol = evt.detail?.symbol || null;
+            if (!detailSymbol) return;
+            if (marketSelect && [...marketSelect.options].some(opt => opt.value === detailSymbol)) {
+              marketSelect.value = detailSymbol;
+            }
+            syncSelection({ forceReset: false });
+          });
+
+          document.addEventListener('ws:markets-loaded', () => {
+            syncSelection({ forceReset: false });
+          });
+
+          document.addEventListener('ws:digit-stats', (evt) => {
+            const { symbol, stats } = evt.detail || {};
+            const currentSymbol = marketSelect ? marketSelect.value : activeSymbol;
+            if (!symbol || symbol !== currentSymbol) return;
+            const queue = window.AppWS ? window.AppWS.getDigitQueue(currentSymbol) : [];
+            renderFromStats(stats, queue);
+          });
+
+          syncSelection({ forceReset: false });
+        };
+
+        showSection('home');
+        setupDigitsDistribution();
+      });
+    </script>
+    </div>
+  </body>
+  </html>
+
