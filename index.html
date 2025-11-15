@@ -329,6 +329,32 @@
             </div>
           </div>
         </section>
+        <section id="strategiesAnalysisCard" class="bg-white rounded-xl shadow-card border border-teal/10">
+          <div id="strategiesAnalysisTitleBar" class="flex items-center justify-between p-4 sm:p-6 border-b border-teal/10">
+            <h2 class="text-lg font-semibold text-navy">Strategies Analysis</h2>
+            <span class="expand-icon text-teal text-sm">▶</span>
+          </div>
+          <div id="strategiesAnalysisContent" class="hidden p-4 sm:p-6">
+            <div class="space-y-4">
+              <!-- Strategy Selection -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label class="flex flex-col">
+                  <span class="text-sm font-medium text-navy/80 mb-1">Strategy</span>
+                  <select id="strategiesAnalysisSelect" class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-2 text-sm text-navy focus:outline-none focus:ring-2 focus:ring-leaf/60">
+                    <option value="over1" selected>Over 1</option>
+                    <option value="under8">Under 8</option>
+                    <option value="over5under4">Over 5 / Under 4</option>
+                    <option value="matches">Matches</option>
+                  </select>
+                </label>
+              </div>
+              <!-- Strategy Content (dynamically rendered) -->
+              <div id="strategiesAnalysisResults" class="text-sm text-navy/80">
+                <!-- Results will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <!-- Finances Section -->
@@ -347,6 +373,7 @@
     <script src="matches_trading.js"></script>
     <script src="momentum_analysis.js"></script>
     <script src="streak_filter.js"></script>
+    <script src="strategies-analysis.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         // Sidebar toggle functionality
