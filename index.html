@@ -30,20 +30,34 @@
   </head>
   <body class="min-h-screen bg-mint text-navy">
     <!-- Side Navigation -->
-    <aside class="fixed inset-y-0 left-0 w-56 bg-white border-r border-teal/10 shadow-card z-40">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-56 bg-white border-r border-teal/10 shadow-card z-40 transition-all duration-300 ease-in-out">
       <div class="h-full flex flex-col">
-        <div class="px-4 py-4 border-b border-teal/10">
-          <div class="text-base font-semibold text-navy">App Navigation</div>
+        <div class="px-4 py-4 border-b border-teal/10 flex items-center justify-between">
+          <div id="sidebarTitle" class="text-base font-semibold text-navy transition-opacity duration-300">App Navigation</div>
+          <button id="sidebarToggle" type="button" class="p-1.5 rounded-md hover:bg-mint/60 text-navy/70 hover:text-navy transition" title="Toggle sidebar">
+            <svg id="sidebarToggleIcon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
         </div>
         <nav class="flex-1 px-2 py-3 space-y-1">
-          <button type="button" data-nav="home" class="nav-link w-full text-left rounded-md px-3 py-2 bg-mint text-navy font-semibold shadow-sm">Home</button>
-          <button type="button" data-nav="analysis" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition">Analysis</button>
-          <button type="button" data-nav="finances" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition">Finances</button>
+          <button type="button" data-nav="home" class="nav-link w-full text-left rounded-md px-3 py-2 bg-mint text-navy font-semibold shadow-sm flex items-center justify-start gap-3 group">
+            <span class="flex-shrink-0">🏠</span>
+            <span id="navHomeText" class="transition-opacity duration-300">Home</span>
+          </button>
+          <button type="button" data-nav="analysis" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition flex items-center justify-start gap-3 group">
+            <span class="flex-shrink-0">📊</span>
+            <span id="navAnalysisText" class="transition-opacity duration-300">Analysis</span>
+          </button>
+          <button type="button" data-nav="finances" class="nav-link w-full text-left rounded-md px-3 py-2 text-navy/80 hover:text-navy hover:bg-mint transition flex items-center justify-start gap-3 group">
+            <span class="flex-shrink-0">💰</span>
+            <span id="navFinancesText" class="transition-opacity duration-300">Finances</span>
+          </button>
         </nav>
-        <div class="px-4 py-3 text-xs text-navy/60 border-t border-teal/10">© 2025</div>
+        <div id="sidebarFooter" class="px-4 py-3 text-xs text-navy/60 border-t border-teal/10 transition-opacity duration-300">© 2025</div>
       </div>
     </aside>
-    <div class="pl-56">
+    <div id="mainContent" class="pl-56 transition-all duration-300 ease-in-out">
     <!-- Sticky Navbar -->
     <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-teal/10">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
@@ -244,13 +258,75 @@
             </table>
           </div>
         </section>
-        <section class="bg-white rounded-xl shadow-card border border-teal/10 p-4 sm:p-6">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold text-navy">Matches Analysis</h2>
-            <button id="matchesAnalysisToggle" class="text-sm font-medium text-teal hover:underline">Expand</button>
+        <section id="momentumAnalysisCard" class="bg-white rounded-xl shadow-card border border-teal/10">
+          <div id="momentumAnalysisTitleBar" class="flex items-center justify-between p-4 sm:p-6 border-b border-teal/10">
+            <h2 class="text-lg font-semibold text-navy">Momentum Switch: Hot → Cold Tracker</h2>
+            <span class="expand-icon text-teal text-sm">▶</span>
           </div>
-          <div id="matchesAnalysisContent" class="hidden">
-            <div id="matchesAnalysisSummary" class="text-sm text-navy/80 space-y-4"></div>
+          <div id="momentumAnalysisContent" class="hidden p-4 sm:p-6">
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                <label class="flex flex-col">
+                  <span class="text-sm font-medium text-navy/80 mb-1">Split Point</span>
+                  <input id="momentumSplitPoint" type="range" min="10" max="990" step="10" value="500" class="w-full" />
+                  <div id="momentumSplitPointValue" class="text-xs text-navy/60 mt-1">Last 500 vs Previous 500</div>
+                </label>
+                <button id="momentumRecalculate" class="w-full rounded-lg bg-teal text-white font-semibold px-4 py-2 shadow hover:brightness-95 active:brightness-90 transition">
+                  Recalculate
+                </button>
+              </div>
+              <div id="momentumResults" class="text-sm text-navy/80">
+                <!-- Results will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="streakFilterCard" class="bg-white rounded-xl shadow-card border border-teal/10">
+          <div id="streakFilterTitleBar" class="flex items-center justify-between p-4 sm:p-6 border-b border-teal/10">
+            <h2 class="text-lg font-semibold text-navy">Streak Filter: Live Digit Runs</h2>
+            <span class="expand-icon text-teal text-sm">▶</span>
+          </div>
+          <div id="streakFilterContent" class="hidden p-4 sm:p-6">
+            <div class="space-y-4">
+              <!-- Controls -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <label class="flex flex-col">
+                  <span class="text-sm font-medium text-navy/80 mb-1">Look-Back Window</span>
+                  <input id="streakLookback" type="range" min="20" max="1000" step="10" value="50" class="w-full" />
+                  <div id="streakLookbackValue" class="text-xs text-navy/60 mt-1">50 ticks</div>
+                </label>
+                <label class="flex flex-col">
+                  <span class="text-sm font-medium text-navy/80 mb-1">Highlight Filter</span>
+                  <select id="streakMinStreak" class="w-full rounded-lg border border-teal/20 bg-mint/40 px-3 py-2 text-sm text-navy focus:outline-none focus:ring-2 focus:ring-leaf/60">
+                    <option value="0" selected>Show All</option>
+                    <option value="1">Highlight: 1+</option>
+                    <option value="2">Highlight: 2+</option>
+                    <option value="3">Highlight: 3+</option>
+                    <option value="4">Highlight: 4+</option>
+                    <option value="5">Highlight: 5+</option>
+                    <option value="-1">Highlight: Never Appeared</option>
+                  </select>
+                </label>
+                <div class="flex gap-2">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input id="streakAutoRefresh" type="checkbox" class="rounded border-teal/20 text-leaf focus:ring-leaf/60" />
+                    <span class="text-sm text-navy/80">Auto-Refresh</span>
+                  </label>
+                  <button id="streakRefresh" class="flex-1 rounded-lg bg-teal text-white font-semibold px-3 py-2 text-sm shadow hover:brightness-95 active:brightness-90 transition">
+                    Refresh
+                  </button>
+                </div>
+                <div class="flex justify-end">
+                  <button id="streakExport" class="rounded-lg bg-leaf text-white font-semibold px-3 py-2 text-sm shadow hover:brightness-95 active:brightness-90 transition" title="Export to CSV">
+                    📥 Export
+                  </button>
+                </div>
+              </div>
+              <!-- Results -->
+              <div id="streakResults" class="text-sm text-navy/80">
+                <!-- Results will be rendered here -->
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -268,10 +344,91 @@
     <script src="ws.js"></script>
     <script src="trading.js"></script>
     <script src="pattern_trading.js"></script>
-    <script src="matches_analysis.js"></script>
     <script src="matches_trading.js"></script>
+    <script src="momentum_analysis.js"></script>
+    <script src="streak_filter.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
+        // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarTitle = document.getElementById('sidebarTitle');
+        const sidebarFooter = document.getElementById('sidebarFooter');
+        const navHomeText = document.getElementById('navHomeText');
+        const navAnalysisText = document.getElementById('navAnalysisText');
+        const navFinancesText = document.getElementById('navFinancesText');
+        
+        const SIDEBAR_STATE_KEY = 'sidebarCollapsed';
+        const SIDEBAR_EXPANDED_WIDTH = 'w-56'; // 224px
+        const SIDEBAR_COLLAPSED_WIDTH = 'w-16'; // 64px
+        const MAIN_EXPANDED_PADDING = 'pl-56';
+        const MAIN_COLLAPSED_PADDING = 'pl-16';
+
+        // Load saved state
+        const isCollapsed = localStorage.getItem(SIDEBAR_STATE_KEY) === 'true';
+        
+        function setSidebarCollapsed(collapsed) {
+          if (collapsed) {
+            // Collapsed state
+            sidebar.classList.remove(SIDEBAR_EXPANDED_WIDTH);
+            sidebar.classList.add(SIDEBAR_COLLAPSED_WIDTH);
+            mainContent.classList.remove(MAIN_EXPANDED_PADDING);
+            mainContent.classList.add(MAIN_COLLAPSED_PADDING);
+            
+            // Hide text elements
+            sidebarTitle.classList.add('opacity-0', 'w-0', 'overflow-hidden');
+            sidebarFooter.classList.add('opacity-0', 'overflow-hidden');
+            navHomeText.classList.add('opacity-0', 'w-0', 'overflow-hidden');
+            navAnalysisText.classList.add('opacity-0', 'w-0', 'overflow-hidden');
+            navFinancesText.classList.add('opacity-0', 'w-0', 'overflow-hidden');
+            
+            // Rotate icon to point right (when collapsed, show right arrow)
+            sidebarToggleIcon.style.transform = 'rotate(180deg)';
+            
+            // Center nav buttons
+            document.querySelectorAll('.nav-link').forEach(btn => {
+              btn.classList.add('justify-center', 'px-2');
+              btn.classList.remove('justify-start');
+            });
+          } else {
+            // Expanded state
+            sidebar.classList.remove(SIDEBAR_COLLAPSED_WIDTH);
+            sidebar.classList.add(SIDEBAR_EXPANDED_WIDTH);
+            mainContent.classList.remove(MAIN_COLLAPSED_PADDING);
+            mainContent.classList.add(MAIN_EXPANDED_PADDING);
+            
+            // Show text elements
+            sidebarTitle.classList.remove('opacity-0', 'w-0', 'overflow-hidden');
+            sidebarFooter.classList.remove('opacity-0', 'overflow-hidden');
+            navHomeText.classList.remove('opacity-0', 'w-0', 'overflow-hidden');
+            navAnalysisText.classList.remove('opacity-0', 'w-0', 'overflow-hidden');
+            navFinancesText.classList.remove('opacity-0', 'w-0', 'overflow-hidden');
+            
+            // Rotate icon to point left
+            sidebarToggleIcon.style.transform = 'rotate(0deg)';
+            
+            // Restore nav button layout
+            document.querySelectorAll('.nav-link').forEach(btn => {
+              btn.classList.remove('justify-center', 'px-2');
+              btn.classList.add('justify-start');
+            });
+          }
+          
+          localStorage.setItem(SIDEBAR_STATE_KEY, collapsed.toString());
+        }
+
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener('click', () => {
+            const currentlyCollapsed = sidebar.classList.contains(SIDEBAR_COLLAPSED_WIDTH);
+            setSidebarCollapsed(!currentlyCollapsed);
+          });
+        }
+
+        // Initialize sidebar state
+        setSidebarCollapsed(isCollapsed);
+
         const navButtons = document.querySelectorAll('[data-nav]');
         const sections = document.querySelectorAll('[data-section]');
         const connectionControls = document.getElementById('connectionControls');
