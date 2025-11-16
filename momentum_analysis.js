@@ -7,6 +7,8 @@
   const cardEl = document.getElementById('momentumAnalysisCard');
   const titleBarEl = document.getElementById('momentumAnalysisTitleBar');
   const contentEl = document.getElementById('momentumAnalysisContent');
+  const totalLookbackInput = document.getElementById('momentumTotalLookback');
+  const totalLookbackValue = document.getElementById('momentumTotalLookbackValue');
   const splitPointInput = document.getElementById('momentumSplitPoint');
   const splitPointValue = document.getElementById('momentumSplitPointValue');
   const recalculateBtn = document.getElementById('momentumRecalculate');
@@ -14,28 +16,60 @@
 
   let expanded = false;
 
-  // Default split point (500 recent, 500 prior)
+  // Default values
   const DEFAULT_SPLIT = 500;
+  const DEFAULT_TOTAL_LOOKBACK = 1000;
   const MAX_LOOKBACK = 1000;
+
+  // Initialize total lookback input
+  if (totalLookbackInput) {
+    totalLookbackInput.min = 20;
+    totalLookbackInput.max = MAX_LOOKBACK;
+    totalLookbackInput.step = 10;
+    totalLookbackInput.value = DEFAULT_TOTAL_LOOKBACK;
+    updateTotalLookbackDisplay();
+  }
 
   // Initialize split point input
   if (splitPointInput) {
     splitPointInput.min = 10;
-    splitPointInput.max = MAX_LOOKBACK - 10;
     splitPointInput.step = 10;
-    splitPointInput.value = DEFAULT_SPLIT;
+    updateSplitPointConstraints();
+    splitPointInput.value = Math.min(DEFAULT_SPLIT, getTotalLookback() - 10);
     updateSplitPointDisplay();
+  }
+
+  function getTotalLookback() {
+    return Number(totalLookbackInput?.value || DEFAULT_TOTAL_LOOKBACK);
+  }
+
+  function updateTotalLookbackDisplay() {
+    if (!totalLookbackInput || !totalLookbackValue) return;
+    const total = getTotalLookback();
+    totalLookbackValue.textContent = `${total} ticks`;
+    // Update split point constraints when total lookback changes
+    updateSplitPointConstraints();
+    // Adjust split point if it exceeds new total
+    const currentSplit = Number(splitPointInput?.value || DEFAULT_SPLIT);
+    const maxSplit = total - 10;
+    if (currentSplit > maxSplit && splitPointInput) {
+      splitPointInput.value = maxSplit;
+    }
+    updateSplitPointDisplay();
+  }
+
+  function updateSplitPointConstraints() {
+    if (!splitPointInput) return;
+    const total = getTotalLookback();
+    splitPointInput.max = total - 10;
   }
 
   function updateSplitPointDisplay() {
     if (!splitPointInput || !splitPointValue) return;
     const recent = Number(splitPointInput.value) || DEFAULT_SPLIT;
-    const prior = MAX_LOOKBACK - recent;
+    const total = getTotalLookback();
+    const prior = total - recent;
     splitPointValue.textContent = `Last ${recent} vs Previous ${prior}`;
-    // Update max to ensure we can always have a valid prior window
-    if (splitPointInput.max !== MAX_LOOKBACK - 10) {
-      splitPointInput.max = MAX_LOOKBACK - 10;
-    }
   }
 
   function setExpanded(state) {
@@ -76,7 +110,7 @@
     return 'Very Low';
   }
 
-  function calculateMomentum(queue, splitPoint) {
+  function calculateMomentum(queue, splitPoint, totalLookback) {
     if (!Array.isArray(queue) || queue.length < 20) {
       return null;
     }
@@ -84,9 +118,10 @@
     const totalAvailable = queue.length;
     // Recent window: last N ticks (where N = splitPoint, capped at available data)
     const recentSize = Math.min(splitPoint, totalAvailable);
-    // Prior window: (MAX_LOOKBACK - splitPoint) ticks before recent, or as many as available
-    // e.g., splitPoint=500 -> prior=500, splitPoint=200 -> prior=800
-    const idealPriorSize = MAX_LOOKBACK - splitPoint;
+    // Prior window: (totalLookback - splitPoint) ticks before recent, or as many as available
+    // e.g., totalLookback=200, splitPoint=100 -> prior=100
+    //      totalLookback=1000, splitPoint=500 -> prior=500
+    const idealPriorSize = totalLookback - splitPoint;
     const priorSize = Math.min(idealPriorSize, totalAvailable - recentSize);
 
     if (priorSize < 10 || recentSize < 10) {
@@ -255,7 +290,8 @@
     }
 
     const splitPoint = Number(splitPointInput?.value || DEFAULT_SPLIT);
-    const analysis = calculateMomentum(queue, splitPoint);
+    const totalLookback = getTotalLookback();
+    const analysis = calculateMomentum(queue, splitPoint, totalLookback);
 
     if (!analysis) {
       if (resultsContainer) {
@@ -275,6 +311,15 @@
       setExpanded(!expanded);
     });
     titleBarEl.style.cursor = 'pointer';
+  }
+
+  if (totalLookbackInput) {
+    totalLookbackInput.addEventListener('input', () => {
+      updateTotalLookbackDisplay();
+      if (expanded) {
+        calculateAndRender();
+      }
+    });
   }
 
   if (splitPointInput) {
